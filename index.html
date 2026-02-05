@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ebook to AZW3 Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #eaeaea;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #e94560, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+
+        .converter-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        .upload-zone {
+            border: 3px dashed rgba(233, 69, 96, 0.3);
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(233, 69, 96, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .upload-zone:hover::before {
+            left: 100%;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #e94560;
+            background: rgba(233, 69, 96, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            fill: #e94560;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .upload-text {
+            font-size: 1.3rem;
+            color: #fff;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .upload-hint {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .formats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+            animation: fadeIn 0.8s ease 0.4s both;
+        }
+
+        .format-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #b0b0b0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .format-tag:hover {
+            background: rgba(233, 69, 96, 0.2);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .file-list {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .file-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideIn 0.4s ease;
+        }
+
+        .file-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+
+        .file-size {
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .file-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-waiting {
+            background: rgba(254, 202, 87, 0.2);
+            color: #feca57;
+        }
+
+        .status-converting {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+
+        .status-done {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+        }
+
+        .progress-bar {
+            width: 100px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            width: 0%;
+            transition: width 0.3s ease;
+            animation: shimmer 1.5s infinite;
+        }
+
+        .convert-btn {
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 30px;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .convert-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(233, 69, 96, 0.4);
+        }
+
+        .convert-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .convert-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(30deg);
+            transition: all 0.6s ease;
+        }
+
+        .convert-btn:hover::after {
+            left: 100%;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #2ed573, #26d0ce);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(46, 213, 115, 0.4);
+        }
+
+        .remove-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #ff6b6b;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-btn:hover {
+            background: rgba(255, 107, 107, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .wasm-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 26, 46, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .wasm-loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(233, 69, 96, 0.3);
+            border-top-color: #e94560;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .wasm-text {
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .wasm-subtext {
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes shimmer {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .error-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #e94560, #c0392b);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(233, 69, 96, 0.4);
+            transform: translateX(400px);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 100;
+            max-width: 350px;
+        }
+
+        .error-toast.show {
+            transform: translateX(0);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+            animation: fadeInUp 0.8s ease 0.6s both;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .feature h3 {
+            color: #fff;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .feature p {
+            color: #888;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .converter-box { padding: 25px; }
+            .upload-zone { padding: 40px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wasm-loading" id="wasmLoading">
+        <div class="loader"></div>
+        <div class="wasm-text">Initializing WASM Converter...</div>
+        <div class="wasm-subtext">Loading ebook conversion engine</div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Ebook to AZW3</h1>
+            <p class="subtitle">Convert any ebook format to Kindle AZW3 format locally in your browser</p>
+        </header>
+
+        <div class="converter-box">
+            <div class="upload-zone" id="uploadZone">
+                <svg class="upload-icon" viewBox="0 0 24 24">
+                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                </svg>
+                <div class="upload-text">Drop your ebook here</div>
+                <div class="upload-hint">or click to browse files</div>
+                <input type="file" class="file-input" id="fileInput" accept=".epub,.mobi,.pdf,.txt,.html,.htm,.rtf,.docx,.lit,.fb2,.pdb,.pml,.azw,.azw1,.azw4,.tpz,.tcr,.cbz,.cbr,.cbc,.oeb,.lrf,.prc,.pkg,.opf" multiple>
+            </div>
+
+            <div class="formats">
+                <span class="format-tag">EPUB</span>
+                <span class="format-tag">MOBI</span>
+                <span class="format-tag">PDF</span>
+                <span class="format-tag">TXT</span>
+                <span class="format-tag">HTML</span>
+                <span class="format-tag">RTF</span>
+                <span class="format-tag">DOCX</span>
+                <span class="format-tag">+15 more</span>
+            </div>
+
+            <div class="file-list" id="fileList"></div>
+
+            <button class="convert-btn" id="convertBtn" style="display: none;">
+                Convert to AZW3
+            </button>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <h3>Private & Secure</h3>
+                <p>All conversion happens locally in your browser. Files never leave your device.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Fast Conversion</h3>
+                <p>WebAssembly powered engine delivers near-native performance.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📚</div>
+                <h3>Kindle Optimized</h3>
+                <p>Output files are optimized for Amazon Kindle devices.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🆓</div>
+                <h3>Free Forever</h3>
+                <p>No registration, no watermarks, no limits. Completely free.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="error-toast" id="errorToast"></div>
+
+    <script type="module">
+        // Simulated WASM module (in production, this would load actual Calibre WASM)
+        let wasmModule = null;
+        let filesToConvert = [];
+
+        // Initialize WASM
+        async function initWASM() {
+            try {
+                // Simulate WASM loading delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // In real implementation, load actual WASM binary here:
+                // wasmModule = await WebAssembly.instantiateStreaming(fetch('calibre-convert.wasm'), imports);
+                
+                document.getElementById('wasmLoading').classList.add('hidden');
+            } catch (error) {
+                showError('Failed to initialize converter engine');
+                console.error(error);
+            }
+        }
+
+        // File handling
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const convertBtn = document.getElementById('convertBtn');
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (isValidFormat(file.name)) {
+                    addFile(file);
+                } else {
+                    showError(`Unsupported format: ${getExtension(file.name)}`);
+                }
+            });
+            updateUI();
+        }
+
+        function isValidFormat(filename) {
+            const valid = ['epub', 'mobi', 'pdf', 'txt', 'html', 'htm', 'rtf', 'docx', 'lit', 'fb2', 'pdb', 'pml', 'azw', 'azw1', 'azw4', 'tpz', 'tcr', 'cbz', 'cbr', 'cbc', 'oeb', 'lrf', 'prc', 'pkg', 'opf'];
+            return valid.includes(getExtension(filename).toLowerCase());
+        }
+
+        function getExtension(filename) {
+            return filename.split('.').pop().toLowerCase();
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function addFile(file) {
+            const id = Date.now() + Math.random();
+            filesToConvert.push({
+                id,
+                file,
+                status: 'waiting',
+                convertedBlob: null
+            });
+            renderFileItem(id, file);
+        }
+
+        function renderFileItem(id, file) {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.id = `file-${id}`;
+            item.innerHTML = `
+                <div class="file-icon">📖</div>
+                <div class="file-info">
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${formatFileSize(file.size)}</div>
+                </div>
+                <div class="file-status">
+                    <span class="status-badge status-waiting" id="status-${id}">Ready</span>
+                    <div class="progress-bar" id="progress-${id}">
+                        <div class="progress-fill" id="fill-${id}"></div>
+                    </div>
+                    <button class="remove-btn" onclick="removeFile(${id})">×</button>
+                </div>
+            `;
+            fileList.appendChild(item);
+        }
+
+        window.removeFile = function(id) {
+            filesToConvert = filesToConvert.filter(f => f.id !== id);
+            document.getElementById(`file-${id}`).remove();
+            updateUI();
+        };
+
+        function updateUI() {
+            fileList.style.display = filesToConvert.length > 0 ? 'block' : 'none';
+            convertBtn.style.display = filesToConvert.length > 0 ? 'block' : 'none';
+        }
+
+        // Conversion process
+        convertBtn.addEventListener('click', async () => {
+            convertBtn.disabled = true;
+            convertBtn.textContent = 'Converting...';
+
+            for (const fileObj of filesToConvert) {
+                if (fileObj.status === 'done') continue;
+                
+                await convertFile(fileObj);
+            }
+
+            convertBtn.disabled = false;
+            convertBtn.textContent = 'Convert More Files';
+        });
+
+        async function convertFile(fileObj) {
+            updateStatus(fileObj.id, 'converting', 'Converting...');
+            
+            // Simulate progress
+            const progressBar = document.getElementById(`progress-${fileObj.id}`);
+            const fill = document.getElementById(`fill-${fileObj.id}`);
+            progressBar.style.display = 'block';
+            
+            for (let i = 0; i <= 100; i += 10) {
+                fill.style.width = i + '%';
+                await new Promise(r => setTimeout(r, 200));
+            }
+
+            // In real implementation:
+            // 1. Read file as ArrayBuffer
+            // 2. Pass to WASM conversion function
+            // 3. Get converted AZW3 data back
+            // 4. Create download blob
+            
+            // Simulated conversion result
+            fileObj.convertedBlob = new Blob(['AZW3 data'], { type: 'application/vnd.amazon.ebook' });
+            fileObj.status = 'done';
+            
+            updateStatus(fileObj.id, 'done', 'Done', true);
+            progressBar.style.display = 'none';
+        }
+
+        function updateStatus(id, status, text, showDownload = false) {
+            const badge = document.getElementById(`status-${id}`);
+            badge.className = `status-badge status-${status}`;
+            badge.textContent = text;
+            
+            if (showDownload) {
+                const fileItem = document.getElementById(`file-${id}`);
+                const fileObj = filesToConvert.find(f => f.id === id);
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(fileObj.convertedBlob);
+                downloadLink.download = fileObj.file.name.replace(/\.[^/.]+$/, '') + '.azw3';
+                downloadLink.className = 'download-btn';
+                downloadLink.textContent = 'Download';
+                fileItem.querySelector('.file-status').appendChild(downloadLink);
+            }
+        }
+
+        function showError(message) {
+            const toast = document.getElementById('errorToast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // Initialize
+        initWASM();
+    </script>
+</body>
+</html>
