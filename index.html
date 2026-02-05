@@ -246,6 +246,12 @@
             overflow: hidden;
         }
 
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
         .convert-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 15px 40px rgba(233, 69, 96, 0.4);
@@ -283,6 +289,24 @@
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
+        }
+
+        .share-btn {
+            background: linear-gradient(135deg, #feca57, #ff9f43);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .share-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(254, 202, 87, 0.4);
         }
 
         .download-btn:hover {
@@ -710,7 +734,40 @@
                 downloadLink.download = fileObj.file.name.replace(/\.[^/.]+$/, '') + '.azw3';
                 downloadLink.className = 'download-btn';
                 downloadLink.textContent = 'Download';
-                fileItem.querySelector('.file-status').appendChild(downloadLink);
+                
+                const actionContainer = document.createElement('div');
+                actionContainer.className = 'action-buttons';
+                actionContainer.appendChild(downloadLink);
+
+                if (navigator.share) {
+                    const shareBtn = document.createElement('button');
+                    shareBtn.className = 'share-btn';
+                    shareBtn.textContent = 'Send to Kindle';
+                    shareBtn.onclick = () => shareFile(fileObj);
+                    actionContainer.appendChild(shareBtn);
+                }
+
+                fileItem.querySelector('.file-status').appendChild(actionContainer);
+            }
+        }
+
+        async function shareFile(fileObj) {
+            try {
+                if (!fileObj.convertedBlob) return;
+
+                const file = new File([fileObj.convertedBlob], fileObj.file.name.replace(/\.[^/.]+$/, '') + '.azw3', {
+                    type: 'application/vnd.amazon.ebook'
+                });
+
+                await navigator.share({
+                    title: 'Send to Kindle',
+                    text: 'Here is your converted ebook.',
+                    files: [file]
+                });
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    showError('Error sharing file: ' + err.message);
+                }
             }
         }
 
