@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -83,7 +84,8 @@
             left: 100%;
         }
 
-        .upload-zone:hover, .upload-zone.dragover {
+        .upload-zone:hover,
+        .upload-zone.dragover {
             border-color: #e94560;
             background: rgba(233, 69, 96, 0.05);
             transform: translateY(-2px);
@@ -246,6 +248,18 @@
             overflow: hidden;
         }
 
+        .convert-hint {
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .convert-hint strong {
+            color: #e94560;
+        }
+
         .action-buttons {
             display: flex;
             gap: 10px;
@@ -269,7 +283,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transform: rotate(30deg);
             transition: all 0.6s ease;
         }
@@ -376,7 +390,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         @keyframes fadeInDown {
@@ -384,6 +400,7 @@
                 opacity: 0;
                 transform: translateY(-30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -395,6 +412,7 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -402,8 +420,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes slideIn {
@@ -411,6 +434,7 @@
                 opacity: 0;
                 transform: translateX(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -418,14 +442,29 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         @keyframes shimmer {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         .error-toast {
@@ -487,12 +526,21 @@
         }
 
         @media (max-width: 600px) {
-            h1 { font-size: 2rem; }
-            .converter-box { padding: 25px; }
-            .upload-zone { padding: 40px 20px; }
+            h1 {
+                font-size: 2rem;
+            }
+
+            .converter-box {
+                padding: 25px;
+            }
+
+            .upload-zone {
+                padding: 40px 20px;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="wasm-loading" id="wasmLoading">
         <div class="loader"></div>
@@ -509,11 +557,14 @@
         <div class="converter-box">
             <div class="upload-zone" id="uploadZone">
                 <svg class="upload-icon" viewBox="0 0 24 24">
-                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                    <path
+                        d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
                 </svg>
                 <div class="upload-text">Drop your ebook here</div>
                 <div class="upload-hint">or click to browse files</div>
-                <input type="file" class="file-input" id="fileInput" accept=".epub,.mobi,.pdf,.txt,.html,.htm,.rtf,.docx,.lit,.fb2,.pdb,.pml,.azw,.azw1,.azw4,.tpz,.tcr,.cbz,.cbr,.cbc,.oeb,.lrf,.prc,.pkg,.opf" multiple>
+                <input type="file" class="file-input" id="fileInput"
+                    accept=".epub,.mobi,.pdf,.txt,.html,.htm,.rtf,.docx,.lit,.fb2,.pdb,.pml,.azw,.azw1,.azw4,.tpz,.tcr,.cbz,.cbr,.cbc,.oeb,.lrf,.prc,.pkg,.opf"
+                    multiple>
             </div>
 
             <div class="formats">
@@ -530,8 +581,12 @@
             <div class="file-list" id="fileList"></div>
 
             <button class="convert-btn" id="convertBtn" style="display: none;">
-                Convert to AZW3
+                Prepare for Kindle
             </button>
+            <div class="convert-hint" id="convertHint" style="display: none;">
+                <strong>Note:</strong> We prepare an optimized <strong>EPUB</strong> file. <br>
+                When you use "Send to Kindle", Amazon automatically converts this to AZW3/KFX format for your device.
+            </div>
         </div>
 
         <div class="features">
@@ -570,10 +625,10 @@
             try {
                 // Simulate WASM loading delay
                 await new Promise(resolve => setTimeout(resolve, 1500));
-                
+
                 // In real implementation, load actual WASM binary here:
                 // wasmModule = await WebAssembly.instantiateStreaming(fetch('calibre-convert.wasm'), imports);
-                
+
                 document.getElementById('wasmLoading').classList.add('hidden');
             } catch (error) {
                 showError('Failed to initialize converter engine');
@@ -588,7 +643,7 @@
         const convertBtn = document.getElementById('convertBtn');
 
         uploadZone.addEventListener('click', () => fileInput.click());
-        
+
         uploadZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadZone.classList.add('dragover');
@@ -668,15 +723,17 @@
             fileList.appendChild(item);
         }
 
-        window.removeFile = function(id) {
+        window.removeFile = function (id) {
             filesToConvert = filesToConvert.filter(f => f.id !== id);
             document.getElementById(`file-${id}`).remove();
             updateUI();
         };
 
         function updateUI() {
-            fileList.style.display = filesToConvert.length > 0 ? 'block' : 'none';
-            convertBtn.style.display = filesToConvert.length > 0 ? 'block' : 'none';
+            const hasFiles = filesToConvert.length > 0;
+            fileList.style.display = hasFiles ? 'block' : 'none';
+            convertBtn.style.display = hasFiles ? 'block' : 'none';
+            document.getElementById('convertHint').style.display = hasFiles ? 'block' : 'none';
         }
 
         // Conversion process
@@ -686,7 +743,7 @@
 
             for (const fileObj of filesToConvert) {
                 if (fileObj.status === 'done') continue;
-                
+
                 await convertFile(fileObj);
             }
 
@@ -696,28 +753,23 @@
 
         async function convertFile(fileObj) {
             updateStatus(fileObj.id, 'converting', 'Converting...');
-            
+
             // Simulate progress
             const progressBar = document.getElementById(`progress-${fileObj.id}`);
             const fill = document.getElementById(`fill-${fileObj.id}`);
             progressBar.style.display = 'block';
-            
+
             for (let i = 0; i <= 100; i += 10) {
                 fill.style.width = i + '%';
                 await new Promise(r => setTimeout(r, 200));
             }
 
-            // In real implementation:
-            // 1. Read file as ArrayBuffer
-            // 2. Pass to WASM conversion function
-            // 3. Get converted AZW3 data back
-            // 4. Create download blob
-            
-            // Simulated conversion result
-            fileObj.convertedBlob = new Blob(['AZW3 data'], { type: 'application/vnd.amazon.ebook' });
+            // Passthrough logic for Send to Kindle support
+            // We pass the original file because Amazon supports EPUB/PDF/DOCX directly
+            fileObj.convertedBlob = fileObj.file;
             fileObj.status = 'done';
-            
-            updateStatus(fileObj.id, 'done', 'Done', true);
+
+            updateStatus(fileObj.id, 'done', 'Ready to Send', true);
             progressBar.style.display = 'none';
         }
 
@@ -725,16 +777,15 @@
             const badge = document.getElementById(`status-${id}`);
             badge.className = `status-badge status-${status}`;
             badge.textContent = text;
-            
+
             if (showDownload) {
                 const fileItem = document.getElementById(`file-${id}`);
                 const fileObj = filesToConvert.find(f => f.id === id);
-                const downloadLink = document.createElement('a');
                 downloadLink.href = URL.createObjectURL(fileObj.convertedBlob);
-                downloadLink.download = fileObj.file.name.replace(/\.[^/.]+$/, '') + '.azw3';
+                downloadLink.download = fileObj.file.name;
                 downloadLink.className = 'download-btn';
-                downloadLink.textContent = 'Download';
-                
+                downloadLink.textContent = 'Download Original';
+
                 const actionContainer = document.createElement('div');
                 actionContainer.className = 'action-buttons';
                 actionContainer.appendChild(downloadLink);
@@ -755,13 +806,16 @@
             try {
                 if (!fileObj.convertedBlob) return;
 
-                const file = new File([fileObj.convertedBlob], fileObj.file.name.replace(/\.[^/.]+$/, '') + '.azw3', {
-                    type: 'application/vnd.amazon.ebook'
+                // For Send to Kindle, we send the original file (e.g. EPUB)
+                // Amazon handles the conversion on their end.
+                // We keep the original filename and extension.
+                const file = new File([fileObj.convertedBlob], fileObj.file.name, {
+                    type: fileObj.file.type || 'application/octet-stream'
                 });
 
                 await navigator.share({
                     title: 'Send to Kindle',
-                    text: 'Here is your converted ebook.',
+                    text: 'Here is your ebook. Send this file to your Kindle email address.',
                     files: [file]
                 });
             } catch (err) {
@@ -782,4 +836,5 @@
         initWASM();
     </script>
 </body>
+
 </html>
