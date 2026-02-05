@@ -697,7 +697,8 @@
                 id,
                 file,
                 status: 'waiting',
-                convertedBlob: null
+                convertedBlob: null,
+                downloadUrl: null
             });
             renderFileItem(id, file);
         }
@@ -724,6 +725,10 @@
         }
 
         window.removeFile = function (id) {
+            const target = filesToConvert.find(f => f.id === id);
+            if (target && target.downloadUrl) {
+                URL.revokeObjectURL(target.downloadUrl);
+            }
             filesToConvert = filesToConvert.filter(f => f.id !== id);
             document.getElementById(`file-${id}`).remove();
             updateUI();
@@ -781,13 +786,30 @@
             if (showDownload) {
                 const fileItem = document.getElementById(`file-${id}`);
                 const fileObj = filesToConvert.find(f => f.id === id);
-                downloadLink.href = URL.createObjectURL(fileObj.convertedBlob);
+                if (!fileObj || !fileObj.convertedBlob) {
+                    return;
+                }
+
+                let actionContainer = fileItem.querySelector('.action-buttons');
+                if (!actionContainer) {
+                    actionContainer = document.createElement('div');
+                    actionContainer.className = 'action-buttons';
+                    fileItem.querySelector('.file-status').appendChild(actionContainer);
+                } else {
+                    actionContainer.innerHTML = '';
+                }
+
+                if (fileObj.downloadUrl) {
+                    URL.revokeObjectURL(fileObj.downloadUrl);
+                    fileObj.downloadUrl = null;
+                }
+
+                fileObj.downloadUrl = URL.createObjectURL(fileObj.convertedBlob);
+                const downloadLink = document.createElement('a');
+                downloadLink.href = fileObj.downloadUrl;
                 downloadLink.download = fileObj.file.name;
                 downloadLink.className = 'download-btn';
-                downloadLink.textContent = 'Download Original';
-
-                const actionContainer = document.createElement('div');
-                actionContainer.className = 'action-buttons';
+                downloadLink.textContent = 'Download File';
                 actionContainer.appendChild(downloadLink);
 
                 if (navigator.share) {
@@ -797,8 +819,6 @@
                     shareBtn.onclick = () => shareFile(fileObj);
                     actionContainer.appendChild(shareBtn);
                 }
-
-                fileItem.querySelector('.file-status').appendChild(actionContainer);
             }
         }
 
